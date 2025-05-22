@@ -1,0 +1,33 @@
+import time
+from telegram import Bot
+from telegram.error import TelegramError
+
+# 🔐 Встав свій токен
+BOT_TOKEN = "7755125198:AAGzmiWGPIgtIAT464a7RLn5w_Goi337Hw0"
+
+# 📤 Канали-джерела
+SOURCE_CHANNELS = ["@InfoFortniteUA"]
+
+# 📥 Цільовий чат
+TARGET_CHAT_ID = "@yourFORTNITEua/1"
+
+bot = Bot(token=BOT_TOKEN)
+last_ids = {}
+
+def check_new_posts():
+    for channel in SOURCE_CHANNELS:
+        try:
+            updates = bot.get_updates()
+            for u in updates:
+                msg = u.message
+                if msg and msg.chat.username == channel.strip('@'):
+                    mid = msg.message_id
+                    if last_ids.get(channel) != mid:
+                        bot.forward_message(chat_id=TARGET_CHAT_ID, from_chat_id=channel, message_id=mid)
+                        last_ids[channel] = mid
+        except TelegramError as e:
+            print(f"Помилка з {channel}: {e}")
+
+while True:
+    check_new_posts()
+    time.sleep(3600)
